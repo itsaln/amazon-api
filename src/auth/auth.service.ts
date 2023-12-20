@@ -1,10 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+	UnauthorizedException
+} from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { faker } from '@faker-js/faker'
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 import { PrismaService } from '@app/prisma.service'
-import { AuthDto } from '@app/auth/auth.dto'
+import { AuthDto } from '@app/auth/dto/auth.dto'
 import { User } from '@prisma/client'
+import { RefreshTokenDto } from '@app/auth/dto/refresh-token.dto'
 
 @Injectable()
 export class AuthService {
@@ -40,6 +46,35 @@ export class AuthService {
 		}
 	}
 
+	async login(dto: AuthDto) {
+		const user = await this.validateUser(dto)
+		const tokens = await this.issueTokens(user.id)
+
+		return {
+			user: this.returnUserFields(user),
+			...tokens
+		}
+	}
+
+	async getNewTokens(dto: RefreshTokenDto) {
+		const result = await this.jwtService.verifyAsync(dto.refreshToken)
+
+		if (!result) throw new UnauthorizedException('Invalid refresh token')
+
+		const user = await this.prismaService.user.findUnique({
+			where: {
+				id: result.id
+			}
+		})
+
+		const tokens = await this.issueTokens(user.id)
+
+		return {
+			user: this.returnUserFields(user),
+			...tokens
+		}
+	}
+
 	private async issueTokens(userId: number) {
 		const data = { id: userId }
 
@@ -54,10 +89,26 @@ export class AuthService {
 		return { accessToken, refreshToken }
 	}
 
-	private async returnUserFields(user: User) {
+	private returnUserFields(user: User) {
 		return {
 			id: user.id,
 			email: user.email
 		}
+	}
+
+	private async validateUser(dto: AuthDto) {
+		const user = await this.prismaService.user.findUnique({
+			where: {
+				email: dto.email
+			}
+		})
+
+		if (!user) throw new NotFoundException('User not found')
+
+		const isValid = await verify(user.password, dto.password)
+
+		if (!isValid) throw new UnauthorizedException('Invalid password')
+
+		return user
 	}
 }
