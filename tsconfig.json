@@ -20,7 +20,7 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "paths": {
-      "@/app/*": ["./src/*"]
+      "@app/*": ["./src/*"]
     }
   }
 }
