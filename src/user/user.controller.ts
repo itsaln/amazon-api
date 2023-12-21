@@ -36,9 +36,9 @@ export class UserController {
 	@Auth()
 	@Patch('profile/favorites/:productId')
 	async toggleFavorite(
-		@Param('productId') productId: number,
-		@CurrentUser('id') id: number
+		@CurrentUser('id') id: number,
+		@Param('productId') productId: string
 	) {
-		return this.userService.toggleFavorite(id, productId)
+		return this.userService.toggleFavorite(id, +productId)
 	}
 }
