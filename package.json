@@ -1,8 +1,12 @@
 {
-  "name": "api",
+  "name": "amazon-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "The ecommerce API for Amazon v2.0",
+  "author": {
+    "email": "itsaln23@gmail.com",
+    "name": "Aladin Mukhammadiev",
+    "url": "https://itsaln.uz"
+  },
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
