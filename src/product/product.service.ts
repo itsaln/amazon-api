@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '@app/prisma.service'
 import { Prisma } from '@prisma/client'
-import {
-	returnProductObject,
-	returnProductObjectFullest
-} from '@app/product/return-product.object'
+import { returnProductObject } from '@app/product/return-product.object'
 import { ProductDto } from '@app/product/dto/product.dto'
 import {
 	EnumProductSort,
@@ -12,7 +9,6 @@ import {
 } from '@app/product/dto/get-all-product.dto'
 import { generateSlug } from '@app/utils/generate-slug'
 import { PaginationService } from '@app/pagination/pagination.service'
-import { el } from '@faker-js/faker'
 
 @Injectable()
 export class ProductService {
@@ -29,15 +25,16 @@ export class ProductService {
 		switch (sort) {
 			case EnumProductSort.LOW_PRICE:
 				prismaSort.push({ price: 'asc' })
-				return
+				break
 			case EnumProductSort.HIGH_PRICE:
 				prismaSort.push({ price: 'desc' })
-				return
+				break
 			case EnumProductSort.OLDEST:
 				prismaSort.push({ createdAt: 'asc' })
-				return
-			default:
+				break
+			case EnumProductSort.NEWEST:
 				prismaSort.push({ createdAt: 'desc' })
+				break
 		}
 
 		const prismaSearchTermFilter: Prisma.ProductWhereInput = searchTerm
@@ -73,7 +70,8 @@ export class ProductService {
 			where: prismaSearchTermFilter,
 			orderBy: prismaSort,
 			skip,
-			take: perPage
+			take: perPage,
+			select: returnProductObject
 		})
 
 		return {
@@ -89,7 +87,7 @@ export class ProductService {
 			where: {
 				id
 			},
-			select: returnProductObjectFullest
+			select: returnProductObject
 		})
 
 		if (!product) throw new NotFoundException('Product not found')
@@ -102,7 +100,7 @@ export class ProductService {
 			where: {
 				slug
 			},
-			select: returnProductObjectFullest
+			select: returnProductObject
 		})
 
 		if (!product) throw new NotFoundException('Product not found')
@@ -117,7 +115,7 @@ export class ProductService {
 					slug: categorySlug
 				}
 			},
-			select: returnProductObjectFullest
+			select: returnProductObject
 		})
 
 		if (!products) throw new NotFoundException('Product not found')
