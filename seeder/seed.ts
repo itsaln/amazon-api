@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv'
 import { PrismaClient, Product } from '@prisma/client'
 import { faker } from '@faker-js/faker'
 import { generateSlug } from '../src/utils/generate-slug'
-import { getRandomNumber } from '../src/utils/random-number'
 
 dotenv.config()
 
@@ -21,9 +20,9 @@ const createProducts = async (quantity: number) => {
 				slug: generateSlug(productName),
 				description: faker.commerce.productDescription(),
 				price: +faker.commerce.price(10, 999, 0),
-				images: Array.from({ length: getRandomNumber(2, 6) }).map(() =>
-					faker.image.imageUrl(500, 500)
-				),
+				images: Array.from({
+					length: faker.number.int({ min: 2, max: 6 })
+				}).map(() => `/uploads/${faker.number.int({ min: 1, max: 5 })}`),
 				category: {
 					create: {
 						name: categoryName,
@@ -33,7 +32,7 @@ const createProducts = async (quantity: number) => {
 				reviews: {
 					create: [
 						{
-							rating: faker.datatype.number({ min: 1, max: 5 }),
+							rating: faker.number.int({ min: 1, max: 5 }),
 							text: faker.lorem.paragraph(),
 							user: {
 								connect: {
@@ -42,7 +41,7 @@ const createProducts = async (quantity: number) => {
 							}
 						},
 						{
-							rating: faker.datatype.number({ min: 1, max: 5 }),
+							rating: faker.number.int({ min: 1, max: 5 }),
 							text: faker.lorem.paragraph(),
 							user: {
 								connect: {

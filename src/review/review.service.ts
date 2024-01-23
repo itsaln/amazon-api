@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@app/prisma.service'
 import { returnReviewObject } from '@app/review/return-review.object'
 import { ReviewDto } from '@app/review/review.dto'
+import { ProductService } from '@app/product/product.service'
 
 @Injectable()
 export class ReviewService {
-	constructor(private prismaService: PrismaService) {}
+	constructor(
+		private prismaService: PrismaService,
+		private productService: ProductService
+	) {}
 
 	async getAll() {
 		return this.prismaService.review.findMany({
@@ -17,7 +21,7 @@ export class ReviewService {
 	}
 
 	async create(userId: number, productId: number, dto: ReviewDto) {
-		// TODO: Проверка на существование товара когда создаем отзыв
+		await this.productService.byId(productId)
 
 		return this.prismaService.review.create({
 			data: {

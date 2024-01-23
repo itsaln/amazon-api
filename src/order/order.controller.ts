@@ -17,10 +17,16 @@ import { PaymentStatusDto } from '@app/order/payment-status.dto'
 export class OrderController {
 	constructor(private readonly orderService: OrderService) {}
 
-	@Auth()
+	@Auth('admin')
 	@Get()
-	getAll(@CurrentUser('id') userId: number) {
-		return this.orderService.getAll(userId)
+	getAll() {
+		return this.orderService.getAll()
+	}
+
+	@Auth()
+	@Get('by-user')
+	getByUserId(@CurrentUser('id') userId: number) {
+		return this.orderService.getByUserId(userId)
 	}
 
 	@UsePipes(new ValidationPipe())

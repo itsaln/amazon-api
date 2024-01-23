@@ -17,6 +17,7 @@ import { CurrentUser } from '@app/auth/decorators/user.decorator'
 export class ReviewController {
 	constructor(private readonly reviewService: ReviewService) {}
 
+	@Auth('admin')
 	@Get()
 	getAll() {
 		return this.reviewService.getAll()
@@ -26,7 +27,7 @@ export class ReviewController {
 	@HttpCode(200)
 	@Auth()
 	@Post('leave/:productId')
-	leaveReview(
+	leave(
 		@CurrentUser('id') id: number,
 		@Param('productId') productId: string,
 		@Body() dto: ReviewDto

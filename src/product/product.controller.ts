@@ -41,7 +41,7 @@ export class ProductController {
 		return this.productService.byCategory(categorySlug)
 	}
 
-	@Auth()
+	@Auth('admin')
 	@Get(':id')
 	getById(@Param('id') id: string) {
 		return this.productService.byId(+id)
@@ -49,7 +49,7 @@ export class ProductController {
 
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
-	@Auth()
+	@Auth('admin')
 	@Post()
 	create() {
 		return this.productService.create()
@@ -57,14 +57,14 @@ export class ProductController {
 
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
-	@Auth()
+	@Auth('admin')
 	@Put(':id')
 	update(@Param('id') id: string, @Body() dto: ProductDto) {
 		return this.productService.update(+id, dto)
 	}
 
 	@HttpCode(200)
-	@Auth()
+	@Auth('admin')
 	@Delete(':id')
 	delete(@Param('id') id: string) {
 		return this.productService.delete(+id)

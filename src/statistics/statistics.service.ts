@@ -1,52 +1,37 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '@app/prisma.service'
-import { UserService } from '@app/user/user.service'
 
 @Injectable()
 export class StatisticsService {
-	constructor(
-		private prismaService: PrismaService,
-		private userService: UserService
-	) {}
+	constructor(private prismaService: PrismaService) {}
 
-	async getMain(userId: number) {
-		const user = await this.userService.byId(userId, {
-			orders: {
-				select: {
-					items: true
-				}
-			},
-			reviews: true
+	async getMain() {
+		const ordersCount = await this.prismaService.order.count()
+		const reviewsCount = await this.prismaService.order.count()
+		const usersCount = await this.prismaService.order.count()
+
+		const totalAmount = await this.prismaService.order.aggregate({
+			_sum: {
+				total: true
+			}
 		})
-
-		// TODO: Закончить статистику
-
-		// // PLEASE DON'T USE IN PRODUCTION
-		// for (let order of user.orders) {
-		// 	let total= 0
-		//
-		// 	for (let price of order.price) {
-		// 		total += price.value
-		// 	}
-		// 	;(order as any).total = total
-		// }
 
 		return [
 			{
 				name: 'Orders',
-				value: user.orders.length
+				value: ordersCount
 			},
 			{
 				name: 'Reviews',
-				value: user.reviews.length
+				value: reviewsCount
 			},
 			{
 				name: 'Favorites',
-				value: user.favorites.length
+				value: usersCount
 			},
 			{
 				name: 'Total amount',
-				value: 1000
+				value: totalAmount._sum.total || 0
 			}
 		]
 	}

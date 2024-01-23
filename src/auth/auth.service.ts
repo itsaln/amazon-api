@@ -11,12 +11,14 @@ import { PrismaService } from '@app/prisma.service'
 import { AuthDto } from '@app/auth/dto/auth.dto'
 import { User } from '@prisma/client'
 import { RefreshTokenDto } from '@app/auth/dto/refresh-token.dto'
+import { UserService } from '@app/user/user.service'
 
 @Injectable()
 export class AuthService {
 	constructor(
 		private prismaService: PrismaService,
-		private jwtService: JwtService
+		private jwtService: JwtService,
+		private userService: UserService
 	) {}
 
 	async register(dto: AuthDto) {
@@ -31,9 +33,9 @@ export class AuthService {
 		const user = await this.prismaService.user.create({
 			data: {
 				email: dto.email,
-				name: faker.name.firstName(),
+				name: faker.person.firstName(),
 				avatarPath: faker.image.avatar(),
-				phone: faker.phone.number('+998 (##) ### ## ##'),
+				phone: faker.phone.number('+998 (9#) ### ## ##'),
 				password: await hash(dto.password)
 			}
 		})
@@ -61,10 +63,8 @@ export class AuthService {
 
 		if (!result) throw new UnauthorizedException('Invalid refresh token')
 
-		const user = await this.prismaService.user.findUnique({
-			where: {
-				id: result.id
-			}
+		const user = await this.userService.byId(result.id, {
+			isAdmin: true
 		})
 
 		const tokens = await this.issueTokens(user.id)
@@ -89,10 +89,11 @@ export class AuthService {
 		return { accessToken, refreshToken }
 	}
 
-	private returnUserFields(user: User) {
+	private returnUserFields(user: Partial<User>) {
 		return {
 			id: user.id,
-			email: user.email
+			email: user.email,
+			isAdmin: user.isAdmin
 		}
 	}
 
